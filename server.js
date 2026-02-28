@@ -286,11 +286,16 @@ app.get("/", (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Start server
+// Start server (only locally, Vercel handles this automatically)
 // ---------------------------------------------------------------------------
-app.listen(PORT, () => {
-  const stores = listRegisteredStores();
-  console.log(`🚀 Draft Order API running on http://localhost:${PORT}`);
-  console.log(`   Registered stores (${stores.length}):`);
-  stores.forEach((s, i) => console.log(`     ${i + 1}. ${s}`));
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    const stores = listRegisteredStores();
+    console.log(`🚀 Draft Order API running on http://localhost:${PORT}`);
+    console.log(`   Registered stores (${stores.length}):`);
+    stores.forEach((s, i) => console.log(`     ${i + 1}. ${s}`));
+  });
+}
+
+// Export for Vercel
+module.exports = app;
