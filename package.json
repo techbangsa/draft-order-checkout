@@ -7,12 +7,16 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["shopify", "draft-order"],
+  "keywords": [
+    "shopify",
+    "draft-order"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "libphonenumber-js": "^1.12.38"
   }
 }
