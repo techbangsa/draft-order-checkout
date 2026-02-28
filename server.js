@@ -98,6 +98,33 @@ function parseName(fullName) {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: format phone number to E.164 using libphonenumber-js
+// Automatically handles all countries
+// ---------------------------------------------------------------------------
+const { parsePhoneNumberFromString } = require("libphonenumber-js");
+
+function formatPhone(phone, countryCode = "ID") {
+  if (!phone) return "";
+  // Remove spaces, dashes, and parentheses
+  const cleaned = phone.replace(/[\s\-\(\)]/g, "");
+  // Already in E.164 format and valid
+  if (cleaned.startsWith("+")) {
+    const parsed = parsePhoneNumberFromString(cleaned);
+    return parsed ? parsed.format("E.164") : cleaned;
+  }
+  // Parse with country code hint
+  const parsed = parsePhoneNumberFromString(cleaned, countryCode.toUpperCase());
+  if (parsed && parsed.isValid()) {
+    return parsed.format("E.164");
+  }
+  // Fallback: if parsing fails, return as-is with + prefix
+  if (cleaned.startsWith("0") && countryCode.toUpperCase() === "ID") {
+    return `+62${cleaned.slice(1)}`;
+  }
+  return `+${cleaned}`;
+}
+
+// ---------------------------------------------------------------------------
 // POST /api/draft-order
 //
 // Accepts FLEXIBLE format from theme:
@@ -136,7 +163,6 @@ app.post("/api/draft-order", async (req, res) => {
     }
 
     const email = customer.email || "";
-    const phone = customer.phone || "";
 
     // Shipping address: support separate shippingAddress OR customer.address
     const shippingAddr = body.shippingAddress || body.shipping_address || {};
@@ -148,6 +174,9 @@ app.post("/api/draft-order", async (req, res) => {
       shippingAddr.province || shippingAddr.provinceCode || "";
     const zip = shippingAddr.zip || "";
     const country = shippingAddr.country || shippingAddr.countryCode || "ID";
+
+    // Format phone based on country (must be after country is resolved)
+    const phone = formatPhone(customer.phone || "", country);
 
     // ---- Validation -------------------------------------------------------
     const errors = [];
