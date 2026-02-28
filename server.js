@@ -8,8 +8,17 @@ const PORT = process.env.PORT || 3000;
 // ---------------------------------------------------------------------------
 // Middleware
 // ---------------------------------------------------------------------------
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "ngrok-skip-browser-warning"],
+  })
+);
 app.use(express.json());
+
+// Explicit OPTIONS handler for preflight (Vercel compatibility)
+app.options("*", cors());
 
 // ---------------------------------------------------------------------------
 // Multi-store registry: reads STORE_{n}_DOMAIN & STORE_{n}_TOKEN from .env
